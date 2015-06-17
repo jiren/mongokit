@@ -8,7 +8,7 @@ Mongoid.load!("#{SPEC_DIR}/fixtures/mongoid.yml", :production)
 
 RSpec.configure do |config|
   config.before(:suite) do
-    DatabaseCleaner.strategy = :truncation, { except: %w[auto_increment_counters] }
+    DatabaseCleaner.strategy = :truncation
     DatabaseCleaner.clean_with(:truncation)
   end
 

@@ -20,7 +20,7 @@ module Mongokit
       #     mongokit :auto_increment
       #
       #     auto_increment :order_count,
-      #     auto_increment :order_no, pattern: "%Y%m#####"  # Default numner symbol is #
+      #     auto_increment :order_no, pattern: "%Y%m#####"  # Default number symbol is #
       #   end
       #
       #   order = Order.create
@@ -38,6 +38,7 @@ module Mongokit
         options[:attribute] = attribute
         options[:model] = self
         options[:type] ||= Integer
+        condition = options[:if] || true
 
         if options[:pattern]
           options[:time_format] = Mongokit::Counter.to_time_format(options[:pattern])
@@ -50,7 +51,15 @@ module Mongokit
         Models::AutoIncrementCounter.find_or_create_with_seed(options)
 
         after_create do |doc|
-          doc.set(attribute => Mongokit::Counter.next(options))
+          satisfied = if condition.class == TrueClass
+                        true
+                      elsif condition.class == Proc
+                        condition.call(doc)
+                      else
+                        doc.instance_eval { eval(condition.to_s) }
+                      end
+
+          doc.set(attribute => Mongokit::Counter.next(options)) if satisfied 
         end
 
         define_method("reserve_#{attribute}!") do

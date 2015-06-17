@@ -63,13 +63,12 @@ describe Mongokit::CsvTransformer do
 
       FileUtils.mkdir_p "#{SPEC_DIR}/tmp"
       out_file = "#{SPEC_DIR}/tmp/zipcode.csv"
-      FileUtils.rm(out_file)
 
       model.to_zipcode_csv(out_file)
 
       lines = CSV.open(out_file).readlines
       expect(lines.length).to eq model.count
+      FileUtils.rm(out_file)
     end
   end
-
 end
